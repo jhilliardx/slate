@@ -1,0 +1,91 @@
+# ---------------------------------------------------------------------------
+# Slate minimal proof of concept
+# CLIPBOARD DIALECT - a flat list of controls, pinned to explicit control
+# versions. Use this if Studio refuses the `Screens:` form.
+#
+#   1. Add a blank screen and rename it to scrSlateMinimal.
+#   2. Select the canvas and paste this file.
+#   3. Open that screen's OnVisible and paste src/scrSlateMinimal-onvisible.fx .
+#
+# If a paste fails with an unrecognised control, it is almost always the
+# @version: copy the same control type out of your own app and match it.
+# ---------------------------------------------------------------------------
+- lblSlateMinimalTitle:
+    Control: Label@2.5.1
+    Properties:
+      X: =40
+      Y: =32
+      Width: =700
+      Height: =32
+      Text: ="Slate — inline SVG icons, no media files"
+      Size: =16
+      FontWeight: =FontWeight.Semibold
+
+- galSlateMinimal:
+    Control: Gallery@2.15.0
+    Variant: BrowseLayout_Vertical_TwoTextOneImage_VariantA_ver5.0
+    Properties:
+      X: =40
+      Y: =88
+      Width: =720
+      Height: =180
+      Layout: =Layout.Vertical
+      WrapCount: =8
+      TemplateSize: =120
+      TemplatePadding: =0
+      Items: =colSlateIcons
+    Children:
+      - imgSlateMinimalIcon:
+          Control: Image@2.2.3
+          Properties:
+            Width: =48
+            Height: =48
+            X: =(Parent.TemplateWidth - Self.Width) / 2
+            Y: =16
+            ImagePosition: =ImagePosition.Fit
+            Image: |
+              ="data:image/svg+xml;utf8," & EncodeUrl(
+                  "<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""#1F3864""><path d=""" &
+                  ThisItem.Path & """/></svg>"
+              )
+
+      - lblSlateMinimalName:
+          Control: Label@2.5.1
+          Properties:
+            X: =4
+            Y: =72
+            Width: =Parent.TemplateWidth - 8
+            Height: =36
+            Text: =ThisItem.Name
+            Size: =8
+            Align: =Align.Center
+            Wrap: =true
+
+# A single icon with no collection at all — the path data lives inline.
+# This is the pattern to reach for on a one-off button or header.
+- imgSlateInline:
+    Control: Image@2.2.3
+    Properties:
+      X: =40
+      Y: =300
+      Width: =64
+      Height: =64
+      ImagePosition: =ImagePosition.Fit
+      Image: |
+        ="data:image/svg+xml;utf8," & EncodeUrl(
+            "<svg xmlns=""http://www.w3.org/2000/svg"" viewBox=""0 0 24 24"" fill=""#A4262C""><path d=""M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z""/></svg>"
+        )
+
+- lblSlateInlineNote:
+    Control: Label@2.5.1
+    Properties:
+      X: =120
+      Y: =300
+      Width: =640
+      Height: =64
+      Text: |
+        ="No collection needed for a one-off: the path data sits directly in the Image property. Change the fill hex to recolour it — the same glyph, any colour, zero extra assets."
+      Size: =10
+      Color: =RGBA(96, 94, 92, 1)
+      VerticalAlign: =VerticalAlign.Middle
+      Wrap: =true

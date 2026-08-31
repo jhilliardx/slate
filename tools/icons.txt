@@ -1,0 +1,152 @@
+# Slate curated icon set — Material Design Icons (filled)
+# format: <material_icon_name> | <category> | <extra search keywords>
+home|Navigation|house start dashboard main
+menu|Navigation|hamburger nav bars
+close|Navigation|x dismiss cancel exit
+arrow_back|Navigation|left previous return
+arrow_forward|Navigation|right next continue
+arrow_upward|Navigation|up top
+arrow_downward|Navigation|down bottom
+chevron_left|Navigation|back prev caret
+chevron_right|Navigation|next forward caret
+expand_more|Navigation|down caret dropdown open
+expand_less|Navigation|up caret collapse
+more_vert|Navigation|kebab overflow options
+more_horiz|Navigation|meatball overflow ellipsis
+apps|Navigation|grid waffle launcher
+refresh|Navigation|reload retry
+open_in_new|Navigation|external link popout
+first_page|Navigation|start rewind
+last_page|Navigation|end
+add|Action|plus new create
+remove|Action|minus subtract
+edit|Action|pencil modify update
+delete|Action|trash bin remove
+save|Action|floppy disk store
+content_copy|Action|duplicate clipboard
+search|Action|find magnify lookup
+filter_list|Action|funnel narrow
+sort|Action|order arrange
+download|Action|export save down
+upload|Action|import send up
+print|Action|printer hardcopy
+share|Action|send distribute
+link|Action|url chain hyperlink
+done|Action|check tick complete ok
+done_all|Action|checks complete all
+check_circle|Status|success approved valid
+cancel|Status|reject invalid deny
+undo|Action|revert back
+redo|Action|forward repeat
+drag_indicator|Action|handle reorder move grip
+info|Status|about information details
+warning|Status|caution alert triangle
+error|Status|fail problem stop
+help|Status|question support faq
+block|Status|deny forbidden restricted
+priority_high|Status|urgent important exclamation
+notifications|Status|bell alert
+notifications_active|Status|bell ringing alert urgent
+verified|Status|approved certified badge
+verified_user|Status|secure trusted shield
+pending|Status|waiting progress clock
+schedule|Status|clock time due
+history|Status|recent past audit log
+hourglass_empty|Status|waiting timer processing
+task_alt|Status|complete done circle check
+person|People|user individual employee
+person_add|People|add user new employee
+people|People|users team multiple
+groups|People|team organization staff
+badge|People|id credential card
+account_circle|People|profile avatar user
+admin_panel_settings|People|administrator privileges role
+supervisor_account|People|manager supervisor lead
+contact_mail|People|address contact directory
+email|Communication|mail message envelope
+phone|Communication|call telephone
+chat|Communication|message conversation
+forum|Communication|discussion board thread
+send|Communication|submit deliver
+sms|Communication|text message
+campaign|Communication|announcement megaphone broadcast
+feedback|Communication|comment suggestion
+description|Content|document file text page
+article|Content|news document page
+folder|Content|directory storage
+folder_open|Content|directory browse
+attach_file|Content|attachment paperclip
+cloud_upload|Content|backup sync upload
+cloud_download|Content|restore sync download
+cloud_done|Content|synced backed up
+picture_as_pdf|Content|pdf document export
+table_chart|Data|grid spreadsheet rows
+bar_chart|Data|graph analytics column
+pie_chart|Data|graph analytics share
+insights|Data|trend analytics chart
+analytics|Data|metrics report chart
+assessment|Data|report review chart
+receipt_long|Content|invoice bill statement
+fact_check|Content|verify review checklist
+checklist|Content|tasks list todo
+assignment|Content|task clipboard form
+assignment_turned_in|Content|submitted complete clipboard
+inventory_2|Content|box package stock
+place|Places|location pin map marker
+map|Places|geography atlas
+location_on|Places|pin gps marker
+business|Places|company office building
+apartment|Places|building facility office
+account_balance|Government|bank agency capitol treasury
+gavel|Government|legal court judge law
+policy|Government|regulation compliance rule
+security|Government|shield protection safe
+lock|Government|secure private closed
+lock_open|Government|unlocked access granted
+key|Government|access credential unlock
+shield|Government|protect defend secure
+local_police|Government|law enforcement officer
+flag|Government|report mark banner
+public|Government|globe world international
+calendar_month|Time|schedule date month
+event|Time|calendar appointment date
+today|Time|date current day
+access_time|Time|clock hour duration
+timer|Time|stopwatch countdown
+update|Time|refresh clock revision
+settings|Settings|gear config preferences options
+tune|Settings|sliders adjust config
+build|Settings|wrench tools maintenance
+dashboard|Settings|overview home tiles
+view_list|Settings|rows list layout
+grid_view|Settings|tiles cards layout
+visibility|Settings|show view eye preview
+visibility_off|Settings|hide hidden eye private
+star|Settings|favorite rating important
+star_border|Settings|favorite outline rating
+favorite|Settings|heart like saved
+bookmark|Settings|save flag mark
+label|Settings|tag category
+category|Settings|group classify type
+list_alt|Settings|list form details
+qr_code_2|Misc|barcode scan code
+fingerprint|Misc|biometric identity auth
+cloud|Misc|storage online remote
+wifi|Misc|network wireless signal
+sync|Misc|refresh update replicate
+power_settings_new|Misc|power off shutdown
+logout|Misc|sign out exit
+login|Misc|sign in enter access
+language|Misc|globe translate locale
+translate|Misc|language localize
+dark_mode|Misc|night theme moon
+light_mode|Misc|day theme sun
+palette|Misc|color theme design
+science|Misc|lab research beaker
+engineering|Misc|technical engineer helmet
+handyman|Misc|tools repair maintenance
+construction|Misc|work site build
+directions_car|Misc|vehicle fleet auto
+local_shipping|Misc|truck delivery logistics
+flight|Misc|plane travel aviation
+train|Misc|rail transit transport
