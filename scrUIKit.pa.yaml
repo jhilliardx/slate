@@ -1,0 +1,2398 @@
+# ==============================================================================
+# scrUIKit.pa.yaml   |   HCT Canvas UI Kit (reusable app elements)
+# ------------------------------------------------------------------------------
+# Power Apps canvas source, YAML v3. Classic controls + manual-layout containers
+# only. No PCF, no component library, no App-level dependencies, no OnVisible.
+#
+# HOW TO USE
+#   Studio paste : copy every "- name:" block under Children (all of it) and
+#                  Ctrl+V onto a blank Tablet (1366 x 768) screen.
+#   Source ctrl  : drop this file into Src/ of an unpacked .msapp.
+#   Reuse        : each overlay is self-contained = 1 backdrop + 1 container
+#                  + 1 timer (toasts add 1 auto-dismiss timer). Copy those
+#                  and the loc* variables travel with them.
+#
+# Z-ORDER: children are listed back-to-front. Overlays are last so they sit on
+# top of the demo content. If Studio shows them reversed, Reorder > Send to back.
+#
+# PALETTE (find/replace to bind to the theme system)
+#   Primary  #1F4E79   Hover #183E60   Pressed #11304B   Tint RGBA(31,78,121,.10)
+#   Text     #111827   Muted #6B7280   Border  #D1D5DB   Border-hover #9CA3AF
+#   Surface  #FFFFFF   Canvas #F3F4F6  Soft #F9FAFB      Tray #E5E7EB
+#   Success  #15803D   Warning #B45309 Danger #B91C1C    Info #1D4ED8
+#
+# ANIMATION PATTERN (all directional elements use the same three parts)
+#   locXOpen = target state.   locXAnim = true while sliding.
+#   timX runs 260 ms, then clears locXAnim.  Reset = !locXAnim rewinds it.
+#   p = eased progress (1 when idle) drives X or Y and the backdrop alpha.
+#   Elements stay Visible while (Open || Anim) so the exit slide renders.
+#
+# CONTEXT VARIABLES
+#   Drawers  : locDrawerBottomOpen/Anim  locDrawerTopOpen/Anim
+#              locDrawerLeftOpen/Anim    locDrawerRightOpen/Anim
+#   Modal    : locModalOpen/Anim
+#   Sidebars : locSidebarLeftOpen/Anim  locSidebarRightOpen/Anim  locNavLeft  locNavRight
+#   Toasts   : locToastBROpen/Anim  locToastBLOpen/Anim  locToastTROpen/Anim  locToastTLOpen/Anim
+#   Other    : locMenuOpen  locMenuChoice  locToggleOn  locTab  locAccordion  locFormReset
+# ==============================================================================
+Screens:
+  scrUIKit:
+    Properties:
+      Fill: =ColorValue("#F3F4F6")
+    Children:
+      # ======================= HEADER =======================
+      - lblKitTitle:
+          Control: Label
+          Properties:
+            Text: ="HCT Canvas UI Kit"
+            X: =40
+            Y: =24
+            Width: =600
+            Height: =36
+            Size: =22
+            FontWeight: =FontWeight.Bold
+            Color: =ColorValue("#111827")
+      - lblKitSubtitle:
+          Control: Label
+          Properties:
+            Text: ="Reusable canvas app elements. Every directional element is built once per direction. Select any control to see it work."
+            X: =40
+            Y: =60
+            Width: =900
+            Height: =24
+            Size: =12
+            Color: =ColorValue("#6B7280")
+
+      # ======================= SECTION 1 · OVERLAY LAUNCHERS =======================
+      - lblSecOverlays:
+          Control: Label
+          Properties:
+            Text: ="OVERLAYS  ·  drawers, modal, toasts, sidebars"
+            X: =40
+            Y: =104
+            Width: =600
+            Height: =24
+            Size: =11
+            FontWeight: =FontWeight.Semibold
+            Color: =ColorValue("#6B7280")
+      - galLaunchers:
+          Control: Gallery
+          Variant: galleryHorizontal
+          Properties:
+            X: =40
+            Y: =130
+            Width: =1010
+            Height: =100
+            TemplateSize: =162
+            TemplatePadding: =4
+            WrapCount: =2
+            ShowNavigation: =false
+            ShowScrollbar: =false
+            Items: |-
+              =Table(
+                  {Key: "DB",  Label: "Drawer · bottom"},
+                  {Key: "DT",  Label: "Drawer · top"},
+                  {Key: "DL",  Label: "Drawer · left"},
+                  {Key: "DR",  Label: "Drawer · right"},
+                  {Key: "TBR", Label: "Toast · bottom right"},
+                  {Key: "TBL", Label: "Toast · bottom left"},
+                  {Key: "TTR", Label: "Toast · top right"},
+                  {Key: "TTL", Label: "Toast · top left"},
+                  {Key: "SL",  Label: "Sidebar · left"},
+                  {Key: "SR",  Label: "Sidebar · right"},
+                  {Key: "MD",  Label: "Modal"}
+              )
+          Children:
+            - btnLauncher:
+                Control: Classic/Button
+                Properties:
+                  Text: =ThisItem.Label
+                  X: =0
+                  Y: =0
+                  Width: =Parent.TemplateWidth
+                  Height: =Parent.TemplateHeight
+                  Size: =11
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =Switch(ThisItem.Key,
+                        "DB",  UpdateContext({locDrawerBottomOpen: true, locDrawerBottomAnim: true}),
+                        "DT",  UpdateContext({locDrawerTopOpen: true, locDrawerTopAnim: true}),
+                        "DL",  UpdateContext({locDrawerLeftOpen: true, locDrawerLeftAnim: true}),
+                        "DR",  UpdateContext({locDrawerRightOpen: true, locDrawerRightAnim: true}),
+                        "MD",  UpdateContext({locModalOpen: true, locModalAnim: true}),
+                        "SL",  UpdateContext({locSidebarLeftOpen: true, locSidebarLeftAnim: true}),
+                        "SR",  UpdateContext({locSidebarRightOpen: true, locSidebarRightAnim: true}),
+                        "TBR", UpdateContext({locToastBROpen: true, locToastBRAnim: true}),
+                        "TBL", UpdateContext({locToastBLOpen: true, locToastBLAnim: true}),
+                        "TTR", UpdateContext({locToastTROpen: true, locToastTRAnim: true}),
+                        "TTL", UpdateContext({locToastTLOpen: true, locToastTLAnim: true})
+                    )
+
+      # ======================= SECTION 2 · INPUTS & BUTTONS =======================
+      - lblSecInputs:
+          Control: Label
+          Properties:
+            Text: ="INPUTS & BUTTONS  ·  input, toggle, classic, outline, dropdown menu"
+            X: =40
+            Y: =250
+            Width: =600
+            Height: =24
+            Size: =11
+            FontWeight: =FontWeight.Semibold
+            Color: =ColorValue("#6B7280")
+
+      # ---- Input ----
+      - lblInputLabel:
+          Control: Label
+          Properties:
+            Text: ="Full name"
+            X: =40
+            Y: =278
+            Width: =300
+            Height: =20
+            Size: =11
+            FontWeight: =FontWeight.Semibold
+            Color: =ColorValue("#374151")
+      - txtInput:
+          Control: Classic/TextInput
+          Properties:
+            HintText: ="Enter your name"
+            Default: =""
+            X: =40
+            Y: =298
+            Width: =300
+            Height: =40
+            Size: =12
+            PaddingLeft: =12
+            Fill: =Color.White
+            Color: =ColorValue("#111827")
+            BorderColor: =ColorValue("#D1D5DB")
+            HoverBorderColor: =ColorValue("#9CA3AF")
+            PressedBorderColor: =ColorValue("#1F4E79")
+            FocusedBorderColor: =ColorValue("#1F4E79")
+            BorderThickness: =1
+            FocusedBorderThickness: =2
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+
+      # ---- Toggle (pill track = button, knob = circle) ----
+      - lblToggleLabel:
+          Control: Label
+          Properties:
+            Text: ="Email notifications"
+            X: =380
+            Y: =278
+            Width: =240
+            Height: =20
+            Size: =11
+            FontWeight: =FontWeight.Semibold
+            Color: =ColorValue("#374151")
+      - btnToggleTrack:
+          Control: Classic/Button
+          Properties:
+            Text: =""
+            X: =380
+            Y: =304
+            Width: =52
+            Height: =28
+            Fill: =If(locToggleOn, ColorValue("#1F4E79"), ColorValue("#D1D5DB"))
+            HoverFill: =If(locToggleOn, ColorValue("#183E60"), ColorValue("#9CA3AF"))
+            PressedFill: =Self.HoverFill
+            BorderThickness: =0
+            RadiusTopLeft: =14
+            RadiusTopRight: =14
+            RadiusBottomLeft: =14
+            RadiusBottomRight: =14
+            OnSelect: |-
+              =UpdateContext({locToggleOn: !locToggleOn})
+      - cirToggleKnob:
+          Control: Circle
+          Properties:
+            X: =btnToggleTrack.X + If(locToggleOn, 27, 3)
+            Y: =btnToggleTrack.Y + 3
+            Width: =22
+            Height: =22
+            Fill: =Color.White
+            BorderThickness: =0
+            OnSelect: =Select(btnToggleTrack)
+      - lblToggleState:
+          Control: Label
+          Properties:
+            Text: =If(locToggleOn, "On", "Off")
+            X: =440
+            Y: =304
+            Width: =60
+            Height: =28
+            Size: =12
+            VerticalAlign: =VerticalAlign.Middle
+            Color: =ColorValue("#6B7280")
+
+      # ---- Classic button ----
+      - btnClassic:
+          Control: Classic/Button
+          Properties:
+            Text: ="Classic button"
+            X: =40
+            Y: =356
+            Width: =160
+            Height: =40
+            Size: =12
+            FontWeight: =FontWeight.Semibold
+            Fill: =ColorValue("#1F4E79")
+            HoverFill: =ColorValue("#183E60")
+            PressedFill: =ColorValue("#11304B")
+            Color: =Color.White
+            HoverColor: =Color.White
+            PressedColor: =Color.White
+            BorderThickness: =0
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            OnSelect: =Notify("Classic button selected", NotificationType.Information)
+
+      # ---- Outline button ----
+      - btnOutline:
+          Control: Classic/Button
+          Properties:
+            Text: ="Outline button"
+            X: =216
+            Y: =356
+            Width: =160
+            Height: =40
+            Size: =12
+            FontWeight: =FontWeight.Semibold
+            Fill: =RGBA(0, 0, 0, 0)
+            HoverFill: =RGBA(31, 78, 121, 0.08)
+            PressedFill: =RGBA(31, 78, 121, 0.16)
+            Color: =ColorValue("#1F4E79")
+            HoverColor: =Self.Color
+            PressedColor: =Self.Color
+            BorderColor: =ColorValue("#1F4E79")
+            HoverBorderColor: =Self.BorderColor
+            PressedBorderColor: =Self.BorderColor
+            BorderThickness: =2
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            OnSelect: =Notify("Outline button selected", NotificationType.Information)
+
+      # ---- Dropdown menu trigger (panel is further down, above everything) ----
+      - btnMenuTrigger:
+          Control: Classic/Button
+          Properties:
+            Text: =Coalesce(locMenuChoice, "Actions") & "   ▾"
+            X: =392
+            Y: =356
+            Width: =180
+            Height: =40
+            Size: =12
+            Fill: =Color.White
+            HoverFill: =ColorValue("#F9FAFB")
+            PressedFill: =ColorValue("#E5E7EB")
+            Color: =ColorValue("#111827")
+            HoverColor: =Self.Color
+            PressedColor: =Self.Color
+            BorderColor: =ColorValue("#D1D5DB")
+            HoverBorderColor: =ColorValue("#9CA3AF")
+            PressedBorderColor: =ColorValue("#9CA3AF")
+            BorderThickness: =1
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+            OnSelect: |-
+              =UpdateContext({locMenuOpen: !locMenuOpen})
+
+      # ======================= SECTION 3 · NAVIGATION & LAYOUT =======================
+      - lblSecLayout:
+          Control: Label
+          Properties:
+            Text: ="NAVIGATION & LAYOUT  ·  tab bar, accordion, dynamic form card"
+            X: =40
+            Y: =416
+            Width: =600
+            Height: =24
+            Size: =11
+            FontWeight: =FontWeight.Semibold
+            Color: =ColorValue("#6B7280")
+
+      # ---- Tab bar (data-driven, pill-in-tray) ----
+      - conTabBar:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =40
+            Y: =444
+            Width: =380
+            Height: =44
+            Fill: =ColorValue("#E5E7EB")
+            RadiusTopLeft: =8
+            RadiusTopRight: =8
+            RadiusBottomLeft: =8
+            RadiusBottomRight: =8
+          Children:
+            - galTabs:
+                Control: Gallery
+                Variant: galleryHorizontal
+                Properties:
+                  X: =4
+                  Y: =4
+                  Width: =Parent.Width - 8
+                  Height: =Parent.Height - 8
+                  TemplateSize: =Self.Width / 3
+                  TemplatePadding: =0
+                  ShowNavigation: =false
+                  ShowScrollbar: =false
+                  Items: |-
+                    =Table(
+                        {Id: 1, Name: "Overview"},
+                        {Id: 2, Name: "Details"},
+                        {Id: 3, Name: "History"}
+                    )
+                Children:
+                  - btnTab:
+                      Control: Classic/Button
+                      Properties:
+                        Text: =ThisItem.Name
+                        X: =0
+                        Y: =0
+                        Width: =Parent.TemplateWidth
+                        Height: =Parent.TemplateHeight
+                        Size: =12
+                        FontWeight: =FontWeight.Semibold
+                        Fill: =If(Coalesce(locTab, 1) = ThisItem.Id, Color.White, RGBA(0, 0, 0, 0))
+                        HoverFill: =If(Coalesce(locTab, 1) = ThisItem.Id, Color.White, RGBA(255, 255, 255, 0.5))
+                        PressedFill: =Color.White
+                        Color: =If(Coalesce(locTab, 1) = ThisItem.Id, ColorValue("#111827"), ColorValue("#6B7280"))
+                        HoverColor: =ColorValue("#111827")
+                        PressedColor: =ColorValue("#111827")
+                        BorderThickness: =0
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        OnSelect: |-
+                          =UpdateContext({locTab: ThisItem.Id})
+      - conTabContent:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =40
+            Y: =496
+            Width: =380
+            Height: =120
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+          Children:
+            - lblTabContentTitle:
+                Control: Label
+                Properties:
+                  Text: =Switch(Coalesce(locTab, 1), 1, "Overview", 2, "Details", 3, "History")
+                  X: =20
+                  Y: =16
+                  Width: =Parent.Width - 40
+                  Height: =24
+                  Size: =14
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#111827")
+            - lblTabContentBody:
+                Control: Label
+                Properties:
+                  Text: |-
+                    =Switch(Coalesce(locTab, 1),
+                        1, "Tabs are a gallery over a table, so adding a tab is adding a row. The selected Id lives in locTab.",
+                        2, "Swap this label for a form, a gallery, or a nested container. Visibility keys off locTab.",
+                        3, "Panels are cheap to add. Keep the tab table and the Switch in sync and nothing else changes."
+                    )
+                  X: =20
+                  Y: =44
+                  Width: =Parent.Width - 40
+                  Height: =64
+                  Size: =12
+                  Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
+                  Color: =ColorValue("#6B7280")
+
+      # ---- Accordion (single-open, three stacked sections) ----
+      - conAccordion:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =460
+            Y: =444
+            Width: =380
+            Height: =lblAcc3.Y + lblAcc3.Height
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            DropShadow: =DropShadow.Light
+          Children:
+            - btnAcc1:
+                Control: Classic/Button
+                Properties:
+                  Text: =If(locAccordion = 1, "▾", "▸") & "    What is in the kit?"
+                  X: =0
+                  Y: =0
+                  Width: =Parent.Width
+                  Height: =44
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Align: =Align.Left
+                  PaddingLeft: =16
+                  Fill: =RGBA(0, 0, 0, 0)
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#F3F4F6")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderThickness: =0
+                  RadiusTopLeft: =10
+                  RadiusTopRight: =10
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  OnSelect: |-
+                    =UpdateContext({locAccordion: If(locAccordion = 1, 0, 1)})
+            - lblAcc1:
+                Control: Label
+                Properties:
+                  Text: ="Four drawers, a modal, four toasts, two sidebars, a dropdown menu, a tab bar, this accordion, an input, a toggle, two button styles and a dynamic form card."
+                  X: =0
+                  Y: =btnAcc1.Y + btnAcc1.Height
+                  Width: =Parent.Width
+                  Height: =If(locAccordion = 1, 84, 0)
+                  Visible: =locAccordion = 1
+                  Size: =12
+                  Wrap: =true
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =6
+                  VerticalAlign: =VerticalAlign.Top
+                  Fill: =ColorValue("#F9FAFB")
+                  Color: =ColorValue("#6B7280")
+            - btnAcc2:
+                Control: Classic/Button
+                Properties:
+                  Text: =If(locAccordion = 2, "▾", "▸") & "    How do the animations work?"
+                  X: =0
+                  Y: =lblAcc1.Y + lblAcc1.Height
+                  Width: =Parent.Width
+                  Height: =44
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Align: =Align.Left
+                  PaddingLeft: =16
+                  Fill: =RGBA(0, 0, 0, 0)
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#F3F4F6")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderThickness: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  OnSelect: |-
+                    =UpdateContext({locAccordion: If(locAccordion = 2, 0, 2)})
+            - lblAcc2:
+                Control: Label
+                Properties:
+                  Text: ="One Timer per element. An Open flag sets the target, an Anim flag runs the timer, and eased progress drives X or Y. No PCF, no HTML, no App formulas."
+                  X: =0
+                  Y: =btnAcc2.Y + btnAcc2.Height
+                  Width: =Parent.Width
+                  Height: =If(locAccordion = 2, 84, 0)
+                  Visible: =locAccordion = 2
+                  Size: =12
+                  Wrap: =true
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =6
+                  VerticalAlign: =VerticalAlign.Top
+                  Fill: =ColorValue("#F9FAFB")
+                  Color: =ColorValue("#6B7280")
+            - btnAcc3:
+                Control: Classic/Button
+                Properties:
+                  Text: =If(locAccordion = 3, "▾", "▸") & "    How do I reuse an element?"
+                  X: =0
+                  Y: =lblAcc2.Y + lblAcc2.Height
+                  Width: =Parent.Width
+                  Height: =44
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Align: =Align.Left
+                  PaddingLeft: =16
+                  Fill: =RGBA(0, 0, 0, 0)
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#F3F4F6")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderThickness: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  RadiusBottomLeft: =If(locAccordion = 3, 0, 10)
+                  RadiusBottomRight: =If(locAccordion = 3, 0, 10)
+                  OnSelect: |-
+                    =UpdateContext({locAccordion: If(locAccordion = 3, 0, 3)})
+            - lblAcc3:
+                Control: Label
+                Properties:
+                  Text: ="Copy the container, its backdrop and its timer together. Rename the loc variables if two of the same element share a screen."
+                  X: =0
+                  Y: =btnAcc3.Y + btnAcc3.Height
+                  Width: =Parent.Width
+                  Height: =If(locAccordion = 3, 84, 0)
+                  Visible: =locAccordion = 3
+                  Size: =12
+                  Wrap: =true
+                  PaddingLeft: =16
+                  PaddingRight: =16
+                  PaddingTop: =6
+                  VerticalAlign: =VerticalAlign.Top
+                  Fill: =ColorValue("#F9FAFB")
+                  Color: =ColorValue("#6B7280")
+
+      # ---- Dynamic form card (fields generated from a table) ----
+      - conFormCard:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =880
+            Y: =444
+            Width: =440
+            Height: =300
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =12
+            RadiusTopRight: =12
+            RadiusBottomLeft: =12
+            RadiusBottomRight: =12
+            DropShadow: =DropShadow.Light
+          Children:
+            - lblFormTitle:
+                Control: Label
+                Properties:
+                  Text: ="New training request"
+                  X: =20
+                  Y: =14
+                  Width: =Parent.Width - 40
+                  Height: =26
+                  Size: =14
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#111827")
+            - lblFormSubtitle:
+                Control: Label
+                Properties:
+                  Text: ="Fields come from a table. Add a row to add a field."
+                  X: =20
+                  Y: =38
+                  Width: =Parent.Width - 40
+                  Height: =20
+                  Size: =11
+                  Color: =ColorValue("#6B7280")
+            - galFormFields:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  X: =20
+                  Y: =66
+                  Width: =Parent.Width - 40
+                  Height: =180
+                  TemplateSize: =60
+                  TemplatePadding: =0
+                  ShowScrollbar: =false
+                  Items: |-
+                    =Table(
+                        {Field: "Requester",     Hint: "Full name",                 Required: true},
+                        {Field: "Duty station",  Hint: "e.g. NCR",                  Required: true},
+                        {Field: "Justification", Hint: "One line is enough",        Required: false}
+                    )
+                Children:
+                  - lblField:
+                      Control: Label
+                      Properties:
+                        Text: =ThisItem.Field & If(ThisItem.Required, " *", "")
+                        X: =0
+                        Y: =0
+                        Width: =Parent.TemplateWidth
+                        Height: =18
+                        Size: =11
+                        FontWeight: =FontWeight.Semibold
+                        Color: =ColorValue("#374151")
+                  - txtField:
+                      Control: Classic/TextInput
+                      Properties:
+                        HintText: =ThisItem.Hint
+                        Default: =""
+                        Reset: =locFormReset
+                        X: =0
+                        Y: =20
+                        Width: =Parent.TemplateWidth
+                        Height: =34
+                        Size: =12
+                        PaddingLeft: =12
+                        Fill: =Color.White
+                        Color: =ColorValue("#111827")
+                        BorderColor: =ColorValue("#D1D5DB")
+                        HoverBorderColor: =ColorValue("#9CA3AF")
+                        PressedBorderColor: =ColorValue("#1F4E79")
+                        FocusedBorderColor: =ColorValue("#1F4E79")
+                        BorderThickness: =1
+                        FocusedBorderThickness: =2
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+            - btnFormReset:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Reset"
+                  X: =Parent.Width - 20 - 120 - 8 - 100
+                  Y: =Parent.Height - 52
+                  Width: =100
+                  Height: =36
+                  Size: =12
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locFormReset: true});
+                    UpdateContext({locFormReset: false})
+            - btnFormSubmit:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Submit"
+                  X: =Parent.Width - 20 - 120
+                  Y: =Parent.Height - 52
+                  Width: =120
+                  Height: =36
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Fill: =ColorValue("#1F4E79")
+                  HoverFill: =ColorValue("#183E60")
+                  PressedFill: =ColorValue("#11304B")
+                  Color: =Color.White
+                  HoverColor: =Color.White
+                  PressedColor: =Color.White
+                  BorderThickness: =0
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =If(
+                        CountRows(Filter(galFormFields.AllItems, Required && IsBlank(Trim(txtField.Text)))) > 0,
+                        Notify("Complete the required fields.", NotificationType.Warning),
+                        Notify("Submitted  ·  " & Concat(galFormFields.AllItems, Field & " = " & txtField.Text, ";  "), NotificationType.Success)
+                    )
+
+      # ======================= DROPDOWN MENU (panel + click-away) =======================
+      - recMenuClickAway:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.Width
+            Height: =Parent.Height
+            Fill: =RGBA(0, 0, 0, 0.01)
+            BorderThickness: =0
+            Visible: =locMenuOpen
+            OnSelect: |-
+              =UpdateContext({locMenuOpen: false})
+      - conMenu:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =btnMenuTrigger.X
+            Y: =btnMenuTrigger.Y + btnMenuTrigger.Height + 6
+            Width: =220
+            Height: =galMenu.Height + 12
+            Visible: =locMenuOpen
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            DropShadow: =DropShadow.Regular
+          Children:
+            - galMenu:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  X: =6
+                  Y: =6
+                  Width: =Parent.Width - 12
+                  Height: =160
+                  TemplateSize: =40
+                  TemplatePadding: =0
+                  ShowScrollbar: =false
+                  Items: |-
+                    =Table(
+                        {Label: "Edit",      Icon: Icon.Edit},
+                        {Label: "Duplicate", Icon: Icon.Copy},
+                        {Label: "Share",     Icon: Icon.Share},
+                        {Label: "Delete",    Icon: Icon.Trash}
+                    )
+                Children:
+                  - btnMenuItem:
+                      Control: Classic/Button
+                      Properties:
+                        Text: =ThisItem.Label
+                        X: =0
+                        Y: =0
+                        Width: =Parent.TemplateWidth
+                        Height: =Parent.TemplateHeight
+                        Size: =12
+                        Align: =Align.Left
+                        PaddingLeft: =40
+                        Fill: =RGBA(0, 0, 0, 0)
+                        HoverFill: =ColorValue("#F3F4F6")
+                        PressedFill: =ColorValue("#E5E7EB")
+                        Color: =If(ThisItem.Label = "Delete", ColorValue("#B91C1C"), ColorValue("#111827"))
+                        HoverColor: =Self.Color
+                        PressedColor: =Self.Color
+                        BorderThickness: =0
+                        RadiusTopLeft: =6
+                        RadiusTopRight: =6
+                        RadiusBottomLeft: =6
+                        RadiusBottomRight: =6
+                        OnSelect: |-
+                          =UpdateContext({locMenuChoice: ThisItem.Label, locMenuOpen: false})
+                  - icoMenuItem:
+                      Control: Classic/Icon
+                      Properties:
+                        Icon: =ThisItem.Icon
+                        X: =12
+                        Y: =10
+                        Width: =20
+                        Height: =20
+                        Color: =btnMenuItem.Color
+                        OnSelect: =Select(btnMenuItem)
+
+      # ======================= SIDEBAR · LEFT =======================
+      - conSidebarLeft:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locSidebarLeftAnim, 1 - Power(1 - timSidebarLeft.Value / timSidebarLeft.Duration, 2), 1)},
+                  If(locSidebarLeftOpen, -Self.Width * (1 - p), -Self.Width * p))
+            Y: =0
+            Width: =280
+            Height: =Parent.Height
+            Visible: =locSidebarLeftOpen || locSidebarLeftAnim
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            DropShadow: =DropShadow.Regular
+          Children:
+            - lblSidebarLeftBrand:
+                Control: Label
+                Properties:
+                  Text: ="HCT Kit"
+                  X: =20
+                  Y: =18
+                  Width: =160
+                  Height: =32
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#1F4E79")
+            - icoSidebarLeftCollapse:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.ChevronLeft
+                  X: =Parent.Width - 44
+                  Y: =20
+                  Width: =28
+                  Height: =28
+                  Color: =ColorValue("#6B7280")
+                  HoverFill: =ColorValue("#F3F4F6")
+                  OnSelect: |-
+                    =UpdateContext({locSidebarLeftOpen: false, locSidebarLeftAnim: true})
+            - galSidebarLeftNav:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  X: =12
+                  Y: =72
+                  Width: =Parent.Width - 24
+                  Height: =240
+                  TemplateSize: =44
+                  TemplatePadding: =2
+                  ShowScrollbar: =false
+                  Items: |-
+                    =Table(
+                        {Id: 1, Label: "Dashboard", Icon: Icon.Home},
+                        {Id: 2, Label: "Schedule",  Icon: Icon.CalendarBlank},
+                        {Id: 3, Label: "Requests",  Icon: Icon.DocumentwithContent},
+                        {Id: 4, Label: "Reports",   Icon: Icon.TrendingUpwards},
+                        {Id: 5, Label: "Settings",  Icon: Icon.Settings}
+                    )
+                Children:
+                  - btnSidebarLeftNav:
+                      Control: Classic/Button
+                      Properties:
+                        Text: =ThisItem.Label
+                        X: =0
+                        Y: =0
+                        Width: =Parent.TemplateWidth
+                        Height: =Parent.TemplateHeight
+                        Size: =12
+                        FontWeight: =If(Coalesce(locNavLeft, 1) = ThisItem.Id, FontWeight.Semibold, FontWeight.Normal)
+                        Align: =Align.Left
+                        PaddingLeft: =44
+                        Fill: =If(Coalesce(locNavLeft, 1) = ThisItem.Id, RGBA(31, 78, 121, 0.1), RGBA(0, 0, 0, 0))
+                        HoverFill: =If(Coalesce(locNavLeft, 1) = ThisItem.Id, RGBA(31, 78, 121, 0.14), ColorValue("#F3F4F6"))
+                        PressedFill: =RGBA(31, 78, 121, 0.18)
+                        Color: =If(Coalesce(locNavLeft, 1) = ThisItem.Id, ColorValue("#1F4E79"), ColorValue("#374151"))
+                        HoverColor: =Self.Color
+                        PressedColor: =Self.Color
+                        BorderThickness: =0
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        OnSelect: |-
+                          =UpdateContext({locNavLeft: ThisItem.Id})
+                  - icoSidebarLeftNav:
+                      Control: Classic/Icon
+                      Properties:
+                        Icon: =ThisItem.Icon
+                        X: =12
+                        Y: =11
+                        Width: =20
+                        Height: =20
+                        Color: =btnSidebarLeftNav.Color
+                        OnSelect: =Select(btnSidebarLeftNav)
+            - lblSidebarLeftFooter:
+                Control: Label
+                Properties:
+                  Text: ="usbpmsd  ·  UI kit v1.0"
+                  X: =20
+                  Y: =Parent.Height - 40
+                  Width: =Parent.Width - 40
+                  Height: =24
+                  Size: =10
+                  Color: =ColorValue("#9CA3AF")
+
+      # ======================= SIDEBAR · RIGHT =======================
+      - conSidebarRight:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locSidebarRightAnim, 1 - Power(1 - timSidebarRight.Value / timSidebarRight.Duration, 2), 1)},
+                  If(locSidebarRightOpen, Parent.Width - Self.Width * p, Parent.Width - Self.Width * (1 - p)))
+            Y: =0
+            Width: =280
+            Height: =Parent.Height
+            Visible: =locSidebarRightOpen || locSidebarRightAnim
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            DropShadow: =DropShadow.Regular
+          Children:
+            - icoSidebarRightCollapse:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.ChevronRight
+                  X: =16
+                  Y: =20
+                  Width: =28
+                  Height: =28
+                  Color: =ColorValue("#6B7280")
+                  HoverFill: =ColorValue("#F3F4F6")
+                  OnSelect: |-
+                    =UpdateContext({locSidebarRightOpen: false, locSidebarRightAnim: true})
+            - lblSidebarRightBrand:
+                Control: Label
+                Properties:
+                  Text: ="Quick nav"
+                  X: =56
+                  Y: =18
+                  Width: =Parent.Width - 76
+                  Height: =32
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#1F4E79")
+            - galSidebarRightNav:
+                Control: Gallery
+                Variant: galleryVertical
+                Properties:
+                  X: =12
+                  Y: =72
+                  Width: =Parent.Width - 24
+                  Height: =240
+                  TemplateSize: =44
+                  TemplatePadding: =2
+                  ShowScrollbar: =false
+                  Items: |-
+                    =Table(
+                        {Id: 1, Label: "Dashboard", Icon: Icon.Home},
+                        {Id: 2, Label: "Schedule",  Icon: Icon.CalendarBlank},
+                        {Id: 3, Label: "Requests",  Icon: Icon.DocumentwithContent},
+                        {Id: 4, Label: "Reports",   Icon: Icon.TrendingUpwards},
+                        {Id: 5, Label: "Settings",  Icon: Icon.Settings}
+                    )
+                Children:
+                  - btnSidebarRightNav:
+                      Control: Classic/Button
+                      Properties:
+                        Text: =ThisItem.Label
+                        X: =0
+                        Y: =0
+                        Width: =Parent.TemplateWidth
+                        Height: =Parent.TemplateHeight
+                        Size: =12
+                        FontWeight: =If(Coalesce(locNavRight, 1) = ThisItem.Id, FontWeight.Semibold, FontWeight.Normal)
+                        Align: =Align.Left
+                        PaddingLeft: =44
+                        Fill: =If(Coalesce(locNavRight, 1) = ThisItem.Id, RGBA(31, 78, 121, 0.1), RGBA(0, 0, 0, 0))
+                        HoverFill: =If(Coalesce(locNavRight, 1) = ThisItem.Id, RGBA(31, 78, 121, 0.14), ColorValue("#F3F4F6"))
+                        PressedFill: =RGBA(31, 78, 121, 0.18)
+                        Color: =If(Coalesce(locNavRight, 1) = ThisItem.Id, ColorValue("#1F4E79"), ColorValue("#374151"))
+                        HoverColor: =Self.Color
+                        PressedColor: =Self.Color
+                        BorderThickness: =0
+                        RadiusTopLeft: =8
+                        RadiusTopRight: =8
+                        RadiusBottomLeft: =8
+                        RadiusBottomRight: =8
+                        OnSelect: |-
+                          =UpdateContext({locNavRight: ThisItem.Id})
+                  - icoSidebarRightNav:
+                      Control: Classic/Icon
+                      Properties:
+                        Icon: =ThisItem.Icon
+                        X: =12
+                        Y: =11
+                        Width: =20
+                        Height: =20
+                        Color: =btnSidebarRightNav.Color
+                        OnSelect: =Select(btnSidebarRightNav)
+            - lblSidebarRightFooter:
+                Control: Label
+                Properties:
+                  Text: ="usbpmsd  ·  UI kit v1.0"
+                  X: =20
+                  Y: =Parent.Height - 40
+                  Width: =Parent.Width - 40
+                  Height: =24
+                  Size: =10
+                  Color: =ColorValue("#9CA3AF")
+
+      # ======================= DRAWER · BOTTOM =======================
+      - recDrawerBottomBackdrop:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.Width
+            Height: =Parent.Height
+            BorderThickness: =0
+            Visible: =locDrawerBottomOpen || locDrawerBottomAnim
+            Fill: |-
+              =With({p: If(locDrawerBottomAnim, timDrawerBottom.Value / timDrawerBottom.Duration, 1)},
+                  RGBA(15, 23, 42, If(locDrawerBottomOpen, 0.45 * p, 0.45 * (1 - p))))
+            OnSelect: |-
+              =UpdateContext({locDrawerBottomOpen: false, locDrawerBottomAnim: true})
+      - conDrawerBottom:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =0
+            Y: |-
+              =With({p: If(locDrawerBottomAnim, 1 - Power(1 - timDrawerBottom.Value / timDrawerBottom.Duration, 2), 1)},
+                  If(locDrawerBottomOpen, Parent.Height - Self.Height * p, Parent.Height - Self.Height * (1 - p)))
+            Width: =Parent.Width
+            Height: =300
+            Visible: =locDrawerBottomOpen || locDrawerBottomAnim
+            Fill: =Color.White
+            RadiusTopLeft: =16
+            RadiusTopRight: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            DropShadow: =DropShadow.Bold
+          Children:
+            - lblDrawerBottomTitle:
+                Control: Label
+                Properties:
+                  Text: ="Filter results"
+                  X: =32
+                  Y: =22
+                  Width: =500
+                  Height: =28
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#111827")
+            - lblDrawerBottomSubtitle:
+                Control: Label
+                Properties:
+                  Text: ="Slides up from the bottom edge. Tap the backdrop, Cancel, or the close icon to dismiss."
+                  X: =32
+                  Y: =50
+                  Width: =700
+                  Height: =22
+                  Size: =11
+                  Color: =ColorValue("#6B7280")
+            - icoDrawerBottomClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 56
+                  Y: =22
+                  Width: =24
+                  Height: =24
+                  Color: =ColorValue("#6B7280")
+                  OnSelect: |-
+                    =UpdateContext({locDrawerBottomOpen: false, locDrawerBottomAnim: true})
+            - lblDrawerBottomField1:
+                Control: Label
+                Properties:
+                  Text: ="Duty station"
+                  X: =32
+                  Y: =96
+                  Width: =300
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerBottomField1:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="e.g. El Paso Sector"
+                  Default: =""
+                  X: =32
+                  Y: =118
+                  Width: =300
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - lblDrawerBottomField2:
+                Control: Label
+                Properties:
+                  Text: ="Training type"
+                  X: =356
+                  Y: =96
+                  Width: =300
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerBottomField2:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="e.g. Firearms"
+                  Default: =""
+                  X: =356
+                  Y: =118
+                  Width: =300
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - btnDrawerBottomCancel:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Cancel"
+                  X: =Parent.Width - 32 - 120 - 8 - 110
+                  Y: =Parent.Height - 64
+                  Width: =110
+                  Height: =40
+                  Size: =12
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerBottomOpen: false, locDrawerBottomAnim: true})
+            - btnDrawerBottomApply:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Apply"
+                  X: =Parent.Width - 32 - 120
+                  Y: =Parent.Height - 64
+                  Width: =120
+                  Height: =40
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Fill: =ColorValue("#1F4E79")
+                  HoverFill: =ColorValue("#183E60")
+                  PressedFill: =ColorValue("#11304B")
+                  Color: =Color.White
+                  HoverColor: =Color.White
+                  PressedColor: =Color.White
+                  BorderThickness: =0
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerBottomOpen: false, locDrawerBottomAnim: true});
+                    Notify("Filters applied", NotificationType.Success)
+
+      # ======================= DRAWER · TOP =======================
+      - recDrawerTopBackdrop:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.Width
+            Height: =Parent.Height
+            BorderThickness: =0
+            Visible: =locDrawerTopOpen || locDrawerTopAnim
+            Fill: |-
+              =With({p: If(locDrawerTopAnim, timDrawerTop.Value / timDrawerTop.Duration, 1)},
+                  RGBA(15, 23, 42, If(locDrawerTopOpen, 0.45 * p, 0.45 * (1 - p))))
+            OnSelect: |-
+              =UpdateContext({locDrawerTopOpen: false, locDrawerTopAnim: true})
+      - conDrawerTop:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =0
+            Y: |-
+              =With({p: If(locDrawerTopAnim, 1 - Power(1 - timDrawerTop.Value / timDrawerTop.Duration, 2), 1)},
+                  If(locDrawerTopOpen, -Self.Height * (1 - p), -Self.Height * p))
+            Width: =Parent.Width
+            Height: =300
+            Visible: =locDrawerTopOpen || locDrawerTopAnim
+            Fill: =Color.White
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            RadiusBottomLeft: =16
+            RadiusBottomRight: =16
+            DropShadow: =DropShadow.Bold
+          Children:
+            - lblDrawerTopTitle:
+                Control: Label
+                Properties:
+                  Text: ="Site notice"
+                  X: =32
+                  Y: =22
+                  Width: =500
+                  Height: =28
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#111827")
+            - lblDrawerTopSubtitle:
+                Control: Label
+                Properties:
+                  Text: ="Slides down from the top edge. Good for announcements, search, or a quick form."
+                  X: =32
+                  Y: =50
+                  Width: =700
+                  Height: =22
+                  Size: =11
+                  Color: =ColorValue("#6B7280")
+            - icoDrawerTopClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 56
+                  Y: =22
+                  Width: =24
+                  Height: =24
+                  Color: =ColorValue("#6B7280")
+                  OnSelect: |-
+                    =UpdateContext({locDrawerTopOpen: false, locDrawerTopAnim: true})
+            - lblDrawerTopField1:
+                Control: Label
+                Properties:
+                  Text: ="Search"
+                  X: =32
+                  Y: =96
+                  Width: =300
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerTopField1:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="Search records"
+                  Default: =""
+                  X: =32
+                  Y: =118
+                  Width: =300
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - lblDrawerTopField2:
+                Control: Label
+                Properties:
+                  Text: ="Fiscal year"
+                  X: =356
+                  Y: =96
+                  Width: =300
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerTopField2:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="e.g. FY26"
+                  Default: =""
+                  X: =356
+                  Y: =118
+                  Width: =300
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - btnDrawerTopCancel:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Cancel"
+                  X: =Parent.Width - 32 - 120 - 8 - 110
+                  Y: =Parent.Height - 64
+                  Width: =110
+                  Height: =40
+                  Size: =12
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerTopOpen: false, locDrawerTopAnim: true})
+            - btnDrawerTopApply:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Search"
+                  X: =Parent.Width - 32 - 120
+                  Y: =Parent.Height - 64
+                  Width: =120
+                  Height: =40
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Fill: =ColorValue("#1F4E79")
+                  HoverFill: =ColorValue("#183E60")
+                  PressedFill: =ColorValue("#11304B")
+                  Color: =Color.White
+                  HoverColor: =Color.White
+                  PressedColor: =Color.White
+                  BorderThickness: =0
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerTopOpen: false, locDrawerTopAnim: true});
+                    Notify("Search submitted", NotificationType.Success)
+
+      # ======================= DRAWER · LEFT =======================
+      - recDrawerLeftBackdrop:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.Width
+            Height: =Parent.Height
+            BorderThickness: =0
+            Visible: =locDrawerLeftOpen || locDrawerLeftAnim
+            Fill: |-
+              =With({p: If(locDrawerLeftAnim, timDrawerLeft.Value / timDrawerLeft.Duration, 1)},
+                  RGBA(15, 23, 42, If(locDrawerLeftOpen, 0.45 * p, 0.45 * (1 - p))))
+            OnSelect: |-
+              =UpdateContext({locDrawerLeftOpen: false, locDrawerLeftAnim: true})
+      - conDrawerLeft:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locDrawerLeftAnim, 1 - Power(1 - timDrawerLeft.Value / timDrawerLeft.Duration, 2), 1)},
+                  If(locDrawerLeftOpen, -Self.Width * (1 - p), -Self.Width * p))
+            Y: =0
+            Width: =380
+            Height: =Parent.Height
+            Visible: =locDrawerLeftOpen || locDrawerLeftAnim
+            Fill: =Color.White
+            RadiusTopLeft: =0
+            RadiusTopRight: =16
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =16
+            DropShadow: =DropShadow.Bold
+          Children:
+            - lblDrawerLeftTitle:
+                Control: Label
+                Properties:
+                  Text: ="Navigation and filters"
+                  X: =24
+                  Y: =22
+                  Width: =Parent.Width - 80
+                  Height: =28
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#111827")
+            - lblDrawerLeftSubtitle:
+                Control: Label
+                Properties:
+                  Text: ="Slides in from the left edge."
+                  X: =24
+                  Y: =50
+                  Width: =Parent.Width - 48
+                  Height: =22
+                  Size: =11
+                  Color: =ColorValue("#6B7280")
+            - icoDrawerLeftClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 48
+                  Y: =22
+                  Width: =24
+                  Height: =24
+                  Color: =ColorValue("#6B7280")
+                  OnSelect: |-
+                    =UpdateContext({locDrawerLeftOpen: false, locDrawerLeftAnim: true})
+            - lblDrawerLeftField1:
+                Control: Label
+                Properties:
+                  Text: ="Sector"
+                  X: =24
+                  Y: =100
+                  Width: =Parent.Width - 48
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerLeftField1:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="e.g. Tucson"
+                  Default: =""
+                  X: =24
+                  Y: =122
+                  Width: =Parent.Width - 48
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - lblDrawerLeftField2:
+                Control: Label
+                Properties:
+                  Text: ="Status"
+                  X: =24
+                  Y: =178
+                  Width: =Parent.Width - 48
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerLeftField2:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="e.g. Pending"
+                  Default: =""
+                  X: =24
+                  Y: =200
+                  Width: =Parent.Width - 48
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - btnDrawerLeftCancel:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Cancel"
+                  X: =24
+                  Y: =Parent.Height - 64
+                  Width: =(Parent.Width - 56) / 2
+                  Height: =40
+                  Size: =12
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerLeftOpen: false, locDrawerLeftAnim: true})
+            - btnDrawerLeftApply:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Apply"
+                  X: =24 + (Parent.Width - 56) / 2 + 8
+                  Y: =Parent.Height - 64
+                  Width: =(Parent.Width - 56) / 2
+                  Height: =40
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Fill: =ColorValue("#1F4E79")
+                  HoverFill: =ColorValue("#183E60")
+                  PressedFill: =ColorValue("#11304B")
+                  Color: =Color.White
+                  HoverColor: =Color.White
+                  PressedColor: =Color.White
+                  BorderThickness: =0
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerLeftOpen: false, locDrawerLeftAnim: true});
+                    Notify("Filters applied", NotificationType.Success)
+
+      # ======================= DRAWER · RIGHT =======================
+      - recDrawerRightBackdrop:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.Width
+            Height: =Parent.Height
+            BorderThickness: =0
+            Visible: =locDrawerRightOpen || locDrawerRightAnim
+            Fill: |-
+              =With({p: If(locDrawerRightAnim, timDrawerRight.Value / timDrawerRight.Duration, 1)},
+                  RGBA(15, 23, 42, If(locDrawerRightOpen, 0.45 * p, 0.45 * (1 - p))))
+            OnSelect: |-
+              =UpdateContext({locDrawerRightOpen: false, locDrawerRightAnim: true})
+      - conDrawerRight:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locDrawerRightAnim, 1 - Power(1 - timDrawerRight.Value / timDrawerRight.Duration, 2), 1)},
+                  If(locDrawerRightOpen, Parent.Width - Self.Width * p, Parent.Width - Self.Width * (1 - p)))
+            Y: =0
+            Width: =380
+            Height: =Parent.Height
+            Visible: =locDrawerRightOpen || locDrawerRightAnim
+            Fill: =Color.White
+            RadiusTopLeft: =16
+            RadiusTopRight: =0
+            RadiusBottomLeft: =16
+            RadiusBottomRight: =0
+            DropShadow: =DropShadow.Bold
+          Children:
+            - lblDrawerRightTitle:
+                Control: Label
+                Properties:
+                  Text: ="Record details"
+                  X: =24
+                  Y: =22
+                  Width: =Parent.Width - 80
+                  Height: =28
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#111827")
+            - lblDrawerRightSubtitle:
+                Control: Label
+                Properties:
+                  Text: ="Slides in from the right edge."
+                  X: =24
+                  Y: =50
+                  Width: =Parent.Width - 48
+                  Height: =22
+                  Size: =11
+                  Color: =ColorValue("#6B7280")
+            - icoDrawerRightClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 48
+                  Y: =22
+                  Width: =24
+                  Height: =24
+                  Color: =ColorValue("#6B7280")
+                  OnSelect: |-
+                    =UpdateContext({locDrawerRightOpen: false, locDrawerRightAnim: true})
+            - lblDrawerRightField1:
+                Control: Label
+                Properties:
+                  Text: ="Title"
+                  X: =24
+                  Y: =100
+                  Width: =Parent.Width - 48
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerRightField1:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="Record title"
+                  Default: =""
+                  X: =24
+                  Y: =122
+                  Width: =Parent.Width - 48
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - lblDrawerRightField2:
+                Control: Label
+                Properties:
+                  Text: ="Owner"
+                  X: =24
+                  Y: =178
+                  Width: =Parent.Width - 48
+                  Height: =20
+                  Size: =11
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#374151")
+            - txtDrawerRightField2:
+                Control: Classic/TextInput
+                Properties:
+                  HintText: ="Assigned to"
+                  Default: =""
+                  X: =24
+                  Y: =200
+                  Width: =Parent.Width - 48
+                  Height: =40
+                  Size: =12
+                  PaddingLeft: =12
+                  Fill: =Color.White
+                  Color: =ColorValue("#111827")
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#1F4E79")
+                  FocusedBorderColor: =ColorValue("#1F4E79")
+                  BorderThickness: =1
+                  FocusedBorderThickness: =2
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+            - btnDrawerRightCancel:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Cancel"
+                  X: =24
+                  Y: =Parent.Height - 64
+                  Width: =(Parent.Width - 56) / 2
+                  Height: =40
+                  Size: =12
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerRightOpen: false, locDrawerRightAnim: true})
+            - btnDrawerRightApply:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Save"
+                  X: =24 + (Parent.Width - 56) / 2 + 8
+                  Y: =Parent.Height - 64
+                  Width: =(Parent.Width - 56) / 2
+                  Height: =40
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Fill: =ColorValue("#1F4E79")
+                  HoverFill: =ColorValue("#183E60")
+                  PressedFill: =ColorValue("#11304B")
+                  Color: =Color.White
+                  HoverColor: =Color.White
+                  PressedColor: =Color.White
+                  BorderThickness: =0
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locDrawerRightOpen: false, locDrawerRightAnim: true});
+                    Notify("Record saved", NotificationType.Success)
+
+      # ======================= MODAL =======================
+      - recModalBackdrop:
+          Control: Rectangle
+          Properties:
+            X: =0
+            Y: =0
+            Width: =Parent.Width
+            Height: =Parent.Height
+            BorderThickness: =0
+            Visible: =locModalOpen || locModalAnim
+            Fill: |-
+              =With({p: If(locModalAnim, timModal.Value / timModal.Duration, 1)},
+                  RGBA(15, 23, 42, If(locModalOpen, 0.5 * p, 0.5 * (1 - p))))
+            OnSelect: |-
+              =UpdateContext({locModalOpen: false, locModalAnim: true})
+      - conModal:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: =(Parent.Width - Self.Width) / 2
+            Y: |-
+              =With({p: If(locModalAnim, 1 - Power(1 - timModal.Value / timModal.Duration, 2), 1)},
+                  (Parent.Height - Self.Height) / 2 + If(locModalOpen, 24 * (1 - p), 24 * p))
+            Width: =520
+            Height: =260
+            Visible: =locModalOpen || locModalAnim
+            Fill: =Color.White
+            RadiusTopLeft: =14
+            RadiusTopRight: =14
+            RadiusBottomLeft: =14
+            RadiusBottomRight: =14
+            DropShadow: =DropShadow.ExtraBold
+          Children:
+            - lblModalTitle:
+                Control: Label
+                Properties:
+                  Text: ="Confirm submission"
+                  X: =28
+                  Y: =24
+                  Width: =Parent.Width - 100
+                  Height: =28
+                  Size: =16
+                  FontWeight: =FontWeight.Bold
+                  Color: =ColorValue("#111827")
+            - icoModalClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 52
+                  Y: =24
+                  Width: =24
+                  Height: =24
+                  Color: =ColorValue("#6B7280")
+                  OnSelect: |-
+                    =UpdateContext({locModalOpen: false, locModalAnim: true})
+            - lblModalBody:
+                Control: Label
+                Properties:
+                  Text: ="This modal overlays the screen with a dimmed backdrop, rises into place, and is dismissed by the backdrop, the close icon, or either button. Swap the body for a form or gallery as needed."
+                  X: =28
+                  Y: =60
+                  Width: =Parent.Width - 56
+                  Height: =110
+                  Size: =12
+                  Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
+                  Color: =ColorValue("#6B7280")
+            - btnModalCancel:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Cancel"
+                  X: =Parent.Width - 28 - 120 - 8 - 100
+                  Y: =Parent.Height - 64
+                  Width: =100
+                  Height: =40
+                  Size: =12
+                  Fill: =Color.White
+                  HoverFill: =ColorValue("#F9FAFB")
+                  PressedFill: =ColorValue("#E5E7EB")
+                  Color: =ColorValue("#111827")
+                  HoverColor: =Self.Color
+                  PressedColor: =Self.Color
+                  BorderColor: =ColorValue("#D1D5DB")
+                  HoverBorderColor: =ColorValue("#9CA3AF")
+                  PressedBorderColor: =ColorValue("#9CA3AF")
+                  BorderThickness: =1
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locModalOpen: false, locModalAnim: true})
+            - btnModalConfirm:
+                Control: Classic/Button
+                Properties:
+                  Text: ="Confirm"
+                  X: =Parent.Width - 28 - 120
+                  Y: =Parent.Height - 64
+                  Width: =120
+                  Height: =40
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Fill: =ColorValue("#1F4E79")
+                  HoverFill: =ColorValue("#183E60")
+                  PressedFill: =ColorValue("#11304B")
+                  Color: =Color.White
+                  HoverColor: =Color.White
+                  PressedColor: =Color.White
+                  BorderThickness: =0
+                  RadiusTopLeft: =8
+                  RadiusTopRight: =8
+                  RadiusBottomLeft: =8
+                  RadiusBottomRight: =8
+                  OnSelect: |-
+                    =UpdateContext({locModalOpen: false, locModalAnim: true});
+                    Notify("Confirmed", NotificationType.Success)
+
+      # ======================= TOAST · BOTTOM RIGHT (success) =======================
+      - conToastBR:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locToastBRAnim, 1 - Power(1 - timToastBR.Value / timToastBR.Duration, 2), 1)},
+                  If(locToastBROpen, Parent.Width - (Self.Width + 24) * p, Parent.Width - (Self.Width + 24) * (1 - p)))
+            Y: =Parent.Height - Self.Height - 24
+            Width: =340
+            Height: =84
+            Visible: =locToastBROpen || locToastBRAnim
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            DropShadow: =DropShadow.Regular
+          Children:
+            - recToastBRAccent:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =5
+                  Height: =Parent.Height
+                  Fill: =ColorValue("#15803D")
+                  BorderThickness: =0
+            - icoToastBR:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.CheckBadge
+                  X: =18
+                  Y: =28
+                  Width: =26
+                  Height: =26
+                  Color: =ColorValue("#15803D")
+            - lblToastBRTitle:
+                Control: Label
+                Properties:
+                  Text: ="Saved"
+                  X: =56
+                  Y: =14
+                  Width: =230
+                  Height: =22
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#111827")
+            - lblToastBRMessage:
+                Control: Label
+                Properties:
+                  Text: ="Success toast from the bottom right. Auto-dismisses in 4 seconds."
+                  X: =56
+                  Y: =36
+                  Width: =240
+                  Height: =40
+                  Size: =11
+                  Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
+                  Color: =ColorValue("#6B7280")
+            - icoToastBRClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 34
+                  Y: =12
+                  Width: =22
+                  Height: =22
+                  Color: =ColorValue("#9CA3AF")
+                  OnSelect: |-
+                    =UpdateContext({locToastBROpen: false, locToastBRAnim: true})
+
+      # ======================= TOAST · BOTTOM LEFT (info) =======================
+      - conToastBL:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locToastBLAnim, 1 - Power(1 - timToastBL.Value / timToastBL.Duration, 2), 1)},
+                  If(locToastBLOpen, -Self.Width + (Self.Width + 24) * p, 24 - (Self.Width + 24) * p))
+            Y: =Parent.Height - Self.Height - 24
+            Width: =340
+            Height: =84
+            Visible: =locToastBLOpen || locToastBLAnim
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            DropShadow: =DropShadow.Regular
+          Children:
+            - recToastBLAccent:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =5
+                  Height: =Parent.Height
+                  Fill: =ColorValue("#1D4ED8")
+                  BorderThickness: =0
+            - icoToastBL:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Information
+                  X: =18
+                  Y: =28
+                  Width: =26
+                  Height: =26
+                  Color: =ColorValue("#1D4ED8")
+            - lblToastBLTitle:
+                Control: Label
+                Properties:
+                  Text: ="Heads up"
+                  X: =56
+                  Y: =14
+                  Width: =230
+                  Height: =22
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#111827")
+            - lblToastBLMessage:
+                Control: Label
+                Properties:
+                  Text: ="Info toast from the bottom left. Same pattern, mirrored X formula."
+                  X: =56
+                  Y: =36
+                  Width: =240
+                  Height: =40
+                  Size: =11
+                  Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
+                  Color: =ColorValue("#6B7280")
+            - icoToastBLClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 34
+                  Y: =12
+                  Width: =22
+                  Height: =22
+                  Color: =ColorValue("#9CA3AF")
+                  OnSelect: |-
+                    =UpdateContext({locToastBLOpen: false, locToastBLAnim: true})
+
+      # ======================= TOAST · TOP RIGHT (warning) =======================
+      - conToastTR:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locToastTRAnim, 1 - Power(1 - timToastTR.Value / timToastTR.Duration, 2), 1)},
+                  If(locToastTROpen, Parent.Width - (Self.Width + 24) * p, Parent.Width - (Self.Width + 24) * (1 - p)))
+            Y: =24
+            Width: =340
+            Height: =84
+            Visible: =locToastTROpen || locToastTRAnim
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            DropShadow: =DropShadow.Regular
+          Children:
+            - recToastTRAccent:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =5
+                  Height: =Parent.Height
+                  Fill: =ColorValue("#B45309")
+                  BorderThickness: =0
+            - icoToastTR:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Warning
+                  X: =18
+                  Y: =28
+                  Width: =26
+                  Height: =26
+                  Color: =ColorValue("#B45309")
+            - lblToastTRTitle:
+                Control: Label
+                Properties:
+                  Text: ="Check this"
+                  X: =56
+                  Y: =14
+                  Width: =230
+                  Height: =22
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#111827")
+            - lblToastTRMessage:
+                Control: Label
+                Properties:
+                  Text: ="Warning toast from the top right. Change the accent, icon, and text per use."
+                  X: =56
+                  Y: =36
+                  Width: =240
+                  Height: =40
+                  Size: =11
+                  Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
+                  Color: =ColorValue("#6B7280")
+            - icoToastTRClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 34
+                  Y: =12
+                  Width: =22
+                  Height: =22
+                  Color: =ColorValue("#9CA3AF")
+                  OnSelect: |-
+                    =UpdateContext({locToastTROpen: false, locToastTRAnim: true})
+
+      # ======================= TOAST · TOP LEFT (error) =======================
+      - conToastTL:
+          Control: GroupContainer
+          Variant: ManualLayout
+          Properties:
+            X: |-
+              =With({p: If(locToastTLAnim, 1 - Power(1 - timToastTL.Value / timToastTL.Duration, 2), 1)},
+                  If(locToastTLOpen, -Self.Width + (Self.Width + 24) * p, 24 - (Self.Width + 24) * p))
+            Y: =24
+            Width: =340
+            Height: =84
+            Visible: =locToastTLOpen || locToastTLAnim
+            Fill: =Color.White
+            BorderColor: =ColorValue("#D1D5DB")
+            BorderThickness: =1
+            RadiusTopLeft: =10
+            RadiusTopRight: =10
+            RadiusBottomLeft: =10
+            RadiusBottomRight: =10
+            DropShadow: =DropShadow.Regular
+          Children:
+            - recToastTLAccent:
+                Control: Rectangle
+                Properties:
+                  X: =0
+                  Y: =0
+                  Width: =5
+                  Height: =Parent.Height
+                  Fill: =ColorValue("#B91C1C")
+                  BorderThickness: =0
+            - icoToastTL:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Error
+                  X: =18
+                  Y: =28
+                  Width: =26
+                  Height: =26
+                  Color: =ColorValue("#B91C1C")
+            - lblToastTLTitle:
+                Control: Label
+                Properties:
+                  Text: ="Something failed"
+                  X: =56
+                  Y: =14
+                  Width: =230
+                  Height: =22
+                  Size: =12
+                  FontWeight: =FontWeight.Semibold
+                  Color: =ColorValue("#111827")
+            - lblToastTLMessage:
+                Control: Label
+                Properties:
+                  Text: ="Error toast from the top left. Close it early with the icon or let it time out."
+                  X: =56
+                  Y: =36
+                  Width: =240
+                  Height: =40
+                  Size: =11
+                  Wrap: =true
+                  VerticalAlign: =VerticalAlign.Top
+                  Color: =ColorValue("#6B7280")
+            - icoToastTLClose:
+                Control: Classic/Icon
+                Properties:
+                  Icon: =Icon.Cancel
+                  X: =Parent.Width - 34
+                  Y: =12
+                  Width: =22
+                  Height: =22
+                  Color: =ColorValue("#9CA3AF")
+                  OnSelect: |-
+                    =UpdateContext({locToastTLOpen: false, locToastTLAnim: true})
+
+      # ======================= TIMERS (hidden) =======================
+      # Slide timers: run once per open/close, 260 ms, then clear the Anim flag.
+      - timDrawerBottom:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locDrawerBottomAnim
+            Reset: =!locDrawerBottomAnim
+            OnTimerEnd: |-
+              =UpdateContext({locDrawerBottomAnim: false})
+            Visible: =false
+            X: =1200
+            Y: =700
+            Width: =20
+            Height: =20
+      - timDrawerTop:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locDrawerTopAnim
+            Reset: =!locDrawerTopAnim
+            OnTimerEnd: |-
+              =UpdateContext({locDrawerTopAnim: false})
+            Visible: =false
+            X: =1224
+            Y: =700
+            Width: =20
+            Height: =20
+      - timDrawerLeft:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locDrawerLeftAnim
+            Reset: =!locDrawerLeftAnim
+            OnTimerEnd: |-
+              =UpdateContext({locDrawerLeftAnim: false})
+            Visible: =false
+            X: =1248
+            Y: =700
+            Width: =20
+            Height: =20
+      - timDrawerRight:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locDrawerRightAnim
+            Reset: =!locDrawerRightAnim
+            OnTimerEnd: |-
+              =UpdateContext({locDrawerRightAnim: false})
+            Visible: =false
+            X: =1272
+            Y: =700
+            Width: =20
+            Height: =20
+      - timModal:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =220
+            Start: =locModalAnim
+            Reset: =!locModalAnim
+            OnTimerEnd: |-
+              =UpdateContext({locModalAnim: false})
+            Visible: =false
+            X: =1296
+            Y: =700
+            Width: =20
+            Height: =20
+      - timSidebarLeft:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locSidebarLeftAnim
+            Reset: =!locSidebarLeftAnim
+            OnTimerEnd: |-
+              =UpdateContext({locSidebarLeftAnim: false})
+            Visible: =false
+            X: =1320
+            Y: =700
+            Width: =20
+            Height: =20
+      - timSidebarRight:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locSidebarRightAnim
+            Reset: =!locSidebarRightAnim
+            OnTimerEnd: |-
+              =UpdateContext({locSidebarRightAnim: false})
+            Visible: =false
+            X: =1200
+            Y: =724
+            Width: =20
+            Height: =20
+      - timToastBR:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locToastBRAnim
+            Reset: =!locToastBRAnim
+            OnTimerEnd: |-
+              =UpdateContext({locToastBRAnim: false})
+            Visible: =false
+            X: =1224
+            Y: =724
+            Width: =20
+            Height: =20
+      - timToastBL:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locToastBLAnim
+            Reset: =!locToastBLAnim
+            OnTimerEnd: |-
+              =UpdateContext({locToastBLAnim: false})
+            Visible: =false
+            X: =1248
+            Y: =724
+            Width: =20
+            Height: =20
+      - timToastTR:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locToastTRAnim
+            Reset: =!locToastTRAnim
+            OnTimerEnd: |-
+              =UpdateContext({locToastTRAnim: false})
+            Visible: =false
+            X: =1272
+            Y: =724
+            Width: =20
+            Height: =20
+      - timToastTL:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =260
+            Start: =locToastTLAnim
+            Reset: =!locToastTLAnim
+            OnTimerEnd: |-
+              =UpdateContext({locToastTLAnim: false})
+            Visible: =false
+            X: =1296
+            Y: =724
+            Width: =20
+            Height: =20
+      # Auto-dismiss timers: start once a toast is fully shown, close it after 4 s.
+      - timToastBRAuto:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =4000
+            Start: =locToastBROpen && !locToastBRAnim
+            Reset: =!(locToastBROpen && !locToastBRAnim)
+            OnTimerEnd: |-
+              =UpdateContext({locToastBROpen: false, locToastBRAnim: true})
+            Visible: =false
+            X: =1320
+            Y: =724
+            Width: =20
+            Height: =20
+      - timToastBLAuto:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =4000
+            Start: =locToastBLOpen && !locToastBLAnim
+            Reset: =!(locToastBLOpen && !locToastBLAnim)
+            OnTimerEnd: |-
+              =UpdateContext({locToastBLOpen: false, locToastBLAnim: true})
+            Visible: =false
+            X: =1200
+            Y: =748
+            Width: =20
+            Height: =20
+      - timToastTRAuto:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =4000
+            Start: =locToastTROpen && !locToastTRAnim
+            Reset: =!(locToastTROpen && !locToastTRAnim)
+            OnTimerEnd: |-
+              =UpdateContext({locToastTROpen: false, locToastTRAnim: true})
+            Visible: =false
+            X: =1224
+            Y: =748
+            Width: =20
+            Height: =20
+      - timToastTLAuto:
+          Control: Timer
+          Properties:
+            AutoStart: =false
+            Repeat: =false
+            Duration: =4000
+            Start: =locToastTLOpen && !locToastTLAnim
+            Reset: =!(locToastTLOpen && !locToastTLAnim)
+            OnTimerEnd: |-
+              =UpdateContext({locToastTLOpen: false, locToastTLAnim: true})
+            Visible: =false
+            X: =1248
+            Y: =748
+            Width: =20
+            Height: =20
